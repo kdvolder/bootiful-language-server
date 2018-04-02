@@ -1,2 +1,4 @@
 .project
 server/.settings
+client/**/package-lock.json
+client/**/jars

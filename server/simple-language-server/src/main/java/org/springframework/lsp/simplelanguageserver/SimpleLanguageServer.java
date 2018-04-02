@@ -17,8 +17,15 @@ package org.springframework.lsp.simplelanguageserver;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.lsp4j.CodeLensOptions;
+import org.eclipse.lsp4j.CompletionOptions;
+import org.eclipse.lsp4j.ExecuteCommandOptions;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.WorkspaceFoldersOptions;
+import org.eclipse.lsp4j.WorkspaceServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -29,12 +36,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lsp.simplelanguageserver.util.AsyncRunner;
 
+import com.google.common.collect.ImmutableList;
+
 public class SimpleLanguageServer implements LanguageServer, LanguageClientAware {
 
 	private static Logger log = LoggerFactory.getLogger(SimpleLanguageServer.class);
 	private AsyncRunner async;
 	private LanguageClient client;
 	private TextDocumentService textDocumentService;
+	private DocumentStateTracker documentTracker;
 	
 	private WorkspaceService workspaceService;
 
@@ -46,6 +56,11 @@ public class SimpleLanguageServer implements LanguageServer, LanguageClientAware
 	@Autowired
 	public void setWorkspaceService(WorkspaceService workspaceService) {
 		this.workspaceService = workspaceService;
+	}
+
+	@Autowired(required=false)
+	public void setDocumentTracker(DocumentStateTracker documentTracker) {
+		this.documentTracker = documentTracker;
 	}
 
 	@Autowired
@@ -60,7 +75,21 @@ public class SimpleLanguageServer implements LanguageServer, LanguageClientAware
 
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
-		return null;
+		return async.invoke(() -> new InitializeResult(getServerCapabilities()));
+	}
+
+	protected final ServerCapabilities getServerCapabilities() {
+		ServerCapabilities c = new ServerCapabilities();
+		if (documentTracker!=null) {
+			c.setTextDocumentSync(documentTracker.canHandleIncrementalChanges() 
+					? TextDocumentSyncKind.Incremental 
+					: TextDocumentSyncKind.Full
+			);
+		} else {
+			c.setTextDocumentSync(TextDocumentSyncKind.None);
+		}
+		log.info("Determined Server Capabilities {}", c);
+		return c;
 	}
 
 	@Override

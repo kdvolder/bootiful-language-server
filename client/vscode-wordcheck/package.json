@@ -7,11 +7,16 @@
     "engines": {
         "vscode": "^1.21.0"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/kdvolder/bootiful-languageserver.git"
+    },
     "categories": [
-        "Other"
+        "Languages",
+        "Linters"
     ],
     "activationEvents": [
-        "onCommand:extension.sayHello"
+        "onLanguage:wordcheck"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -20,16 +25,33 @@
                 "command": "extension.sayHello",
                 "title": "Hello World"
             }
+        ],
+        "languages": [
+            {
+                "id": "wordcheck",
+                "aliases": [
+                    "Worcheck Example"
+                ],
+                "extensions": [
+                    ".wordcheck"
+                ]
+            }
         ]
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
+        "preinstall": "./scripts/preinstall.sh",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+        "vsce-package": "vsce package"
+    },
+    "dependencies": {
+        "@pivotal-tools/commons-vscode": "file:../../../../sts4/vscode-extensions/commons-vscode/pivotal-tools-commons-vscode-0.2.1.tgz",
+        "vscode-languageclient": "^4.0.0"
     },
     "devDependencies": {
+        "vsce": "^1.36.1",
         "typescript": "^2.6.1",
         "vscode": "^1.1.6",
         "tslint": "^5.8.0",

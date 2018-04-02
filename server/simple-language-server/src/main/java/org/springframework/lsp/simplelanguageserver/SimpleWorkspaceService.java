@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.lsp.simplelanguageserver.autoconf;
+package org.springframework.lsp.simplelanguageserver;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

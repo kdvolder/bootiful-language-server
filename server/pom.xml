@@ -39,6 +39,6 @@
 
 	<modules>
 	  <module>simple-language-server</module>
-	  <!-- <module>example-wordcheck</module> -->
+	  <module>example-wordcheck</module>
 	</modules>
 </project>

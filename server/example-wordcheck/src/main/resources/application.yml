@@ -1,3 +1,14 @@
 spring:
   lsp:
     name: wordcheck-sample-languageserver
+    sample:
+      wordcheck:
+        words:
+        - the
+        - quick
+        - brown
+        - fox
+        - jumps
+        - over
+        - lazy
+        - dog

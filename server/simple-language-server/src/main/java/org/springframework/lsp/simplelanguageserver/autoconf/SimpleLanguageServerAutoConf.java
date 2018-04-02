@@ -3,8 +3,10 @@ package org.springframework.lsp.simplelanguageserver.autoconf;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lsp.simplelanguageserver.SimpleDocumentStateTracker;
 import org.springframework.lsp.simplelanguageserver.SimpleLanguageServer;
 import org.springframework.lsp.simplelanguageserver.SimpleTextDocumentService;
+import org.springframework.lsp.simplelanguageserver.SimpleWorkspaceService;
 import org.springframework.lsp.simplelanguageserver.app.LanguageServerApp;
 import org.springframework.lsp.simplelanguageserver.app.LanguageServerAppProperties;
 import org.springframework.lsp.simplelanguageserver.util.AsyncRunner;
@@ -23,6 +25,10 @@ public class SimpleLanguageServerAutoConf {
 	
 	@Bean SimpleTextDocumentService textDocumentService() {
 		return new SimpleTextDocumentService();
+	}
+	
+	@Bean SimpleDocumentStateTracker documentTracker() {
+		return new SimpleDocumentStateTracker();
 	}
 	
 	@Bean SimpleWorkspaceService worspaceService() {
