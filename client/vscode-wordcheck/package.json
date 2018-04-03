@@ -20,12 +20,6 @@
     ],
     "main": "./out/extension",
     "contributes": {
-        "commands": [
-            {
-                "command": "extension.sayHello",
-                "title": "Hello World"
-            }
-        ],
         "languages": [
             {
                 "id": "wordcheck",
