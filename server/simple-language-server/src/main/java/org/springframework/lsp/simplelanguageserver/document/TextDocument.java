@@ -32,6 +32,10 @@ import javolution.text.Text;
 
 public class TextDocument implements IDocument {
 	
+	//TODO: should try to avoid haveing any methods returning String
+	// This defeats the point of using javaolution.Text (i.e. converion into
+	// String can cause massive string copying)
+	
 	//TODO: this 'stateful' object should be
 	// - renamed to TextDocumentState
 	// - not implement IDocument but have a method obtain an IDocument 
@@ -77,7 +81,7 @@ public class TextDocument implements IDocument {
 		return getText().toString();
 	}
 
-	private synchronized Text getText() {
+	public synchronized Text getText() {
 		return text;
 	}
 

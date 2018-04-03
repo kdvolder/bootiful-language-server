@@ -24,7 +24,7 @@ public class LanguageServerAppProperties {
 	
 	/**
 	 * If set, the server will try to connect to
-	 * the LSO client on this port. Only at most one of `client-port` 
+	 * the LSP client on this port. Only at most one of `client-port` 
 	 * or `server-port` should be set.
 	 */
 	private Integer clientPort; 

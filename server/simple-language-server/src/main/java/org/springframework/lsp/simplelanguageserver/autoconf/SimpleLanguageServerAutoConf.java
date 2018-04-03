@@ -1,5 +1,6 @@
 package org.springframework.lsp.simplelanguageserver.autoconf;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,8 @@ import org.springframework.lsp.simplelanguageserver.SimpleTextDocumentService;
 import org.springframework.lsp.simplelanguageserver.SimpleWorkspaceService;
 import org.springframework.lsp.simplelanguageserver.app.LanguageServerApp;
 import org.springframework.lsp.simplelanguageserver.app.LanguageServerAppProperties;
+import org.springframework.lsp.simplelanguageserver.reconcile.LinterFunction;
+import org.springframework.lsp.simplelanguageserver.reconcile.SimpleReconciler;
 import org.springframework.lsp.simplelanguageserver.util.AsyncRunner;
 
 @Configuration
@@ -21,6 +24,11 @@ public class SimpleLanguageServerAutoConf {
 
 	@Bean SimpleLanguageServer server() {
 		return new SimpleLanguageServer();
+	}
+
+	//@ConditionalOnBean({LinterFunction.class})
+	@Bean SimpleReconciler reconciler() {
+		return new SimpleReconciler();
 	}
 	
 	@Bean SimpleTextDocumentService textDocumentService() {

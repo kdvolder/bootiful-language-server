@@ -15,17 +15,16 @@
  */
 package org.springframework.lsp.simplelanguageserver;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-import org.eclipse.lsp4j.CodeLensOptions;
-import org.eclipse.lsp4j.CompletionOptions;
-import org.eclipse.lsp4j.ExecuteCommandOptions;
+import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
-import org.eclipse.lsp4j.WorkspaceFoldersOptions;
-import org.eclipse.lsp4j.WorkspaceServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -38,7 +37,7 @@ import org.springframework.lsp.simplelanguageserver.util.AsyncRunner;
 
 import com.google.common.collect.ImmutableList;
 
-public class SimpleLanguageServer implements LanguageServer, LanguageClientAware {
+public class SimpleLanguageServer implements LanguageServer, LanguageClientAware, DiagnosticPublisher {
 
 	private static Logger log = LoggerFactory.getLogger(SimpleLanguageServer.class);
 	private AsyncRunner async;
@@ -110,6 +109,16 @@ public class SimpleLanguageServer implements LanguageServer, LanguageClientAware
 	@Override
 	public WorkspaceService getWorkspaceService() {
 		return workspaceService;
+	}
+
+	@Override
+	public void publishDiagnostics(TextDocumentIdentifier docId, Collection<Diagnostic> diagnostics) {
+		if (client!=null && diagnostics!=null) {
+			PublishDiagnosticsParams params = new PublishDiagnosticsParams();
+			params.setUri(docId.getUri());
+			params.setDiagnostics(ImmutableList.copyOf(diagnostics));
+			client.publishDiagnostics(params);
+		}
 	}
 
 }

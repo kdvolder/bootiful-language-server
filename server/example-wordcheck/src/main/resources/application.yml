@@ -1,4 +1,7 @@
 spring:
+  output:
+    ansi:
+      enabled: never
   lsp:
     name: wordcheck-sample-languageserver
     sample:

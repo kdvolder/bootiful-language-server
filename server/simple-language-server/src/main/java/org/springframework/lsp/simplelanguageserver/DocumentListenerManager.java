@@ -20,9 +20,11 @@ import java.util.function.Consumer;
 import org.springframework.lsp.simplelanguageserver.document.TextDocument;
 import org.springframework.lsp.simplelanguageserver.document.TextDocumentContentChange;
 
+import reactor.core.Disposable;
+
 public interface DocumentListenerManager {
 
-	void onDidChangeContent(Consumer<TextDocumentContentChange> l);
-	void onDidClose(Consumer<TextDocument> l);
+	Disposable onDidChangeContent(Consumer<TextDocumentContentChange> l);
+	Disposable onDidClose(Consumer<TextDocument> l);
 
 }

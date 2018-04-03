@@ -13,18 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.lsp.simplelanguageserver.reconcile;
+package org.springframework.lsp.simplelanguageserver;
 
-import org.springframework.lsp.simplelanguageserver.document.IDocument;
+import java.util.Collection;
 
-public interface IReconcileEngine {
-	
-	IReconcileEngine NULL = (d, p) -> {
-		p.beginCollecting();
-		p.endCollecting();
-	};
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 
-	//TODO: consider getting rid of IProblemCollector and changing this
-	//api to return Flux<ReconcileProblem> instead.
-	public void reconcile(IDocument doc, IProblemCollector problemCollector);
+public interface DiagnosticPublisher {
+	void publishDiagnostics(TextDocumentIdentifier docId, Collection<Diagnostic> diagnostics);
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import reactor.core.Disposable;
+
 public class ListenerList<T> {
 	
 	private List<Consumer<T>> listeners = new ArrayList<>();
@@ -14,8 +16,13 @@ public class ListenerList<T> {
 		}
 	}
 
-	public void add(Consumer<T> l) {
+	public synchronized Disposable add(Consumer<T> l) {
 		listeners.add(l);
+		return () -> {
+			synchronized (this) {
+				listeners.remove(l);
+			}
+		};
 	}
 
 }

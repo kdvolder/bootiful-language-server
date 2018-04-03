@@ -49,7 +49,7 @@ import org.springframework.lsp.simplelanguageserver.handlers.CompletionHandler;
 import org.springframework.util.Assert;
 
 public class SimpleTextDocumentService implements TextDocumentService {
-
+	
 	private CompletionHandler completionHandler;
 	private DocumentStateTracker documentStateTracker;
 

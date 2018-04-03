@@ -47,7 +47,7 @@
         "vsce-package": "vsce package"
     },
     "dependencies": {
-        "@pivotal-tools/commons-vscode": "file:../../../../sts4/vscode-extensions/commons-vscode/pivotal-tools-commons-vscode-0.2.1.tgz",
+        "@pivotal-tools/commons-vscode": "0.2.1",
         "vscode-languageclient": "^4.0.0"
     },
     "devDependencies": {

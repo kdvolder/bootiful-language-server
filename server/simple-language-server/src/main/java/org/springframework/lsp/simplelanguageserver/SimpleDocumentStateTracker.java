@@ -39,6 +39,8 @@ import org.springframework.lsp.simplelanguageserver.util.ListenerList;
 
 import com.google.common.collect.ImmutableList;
 
+import reactor.core.Disposable;
+
 public class SimpleDocumentStateTracker implements DocumentStateTracker, DocumentListenerManager {
 	
 	private static final Logger log = LoggerFactory.getLogger(SimpleDocumentStateTracker.class);
@@ -166,12 +168,12 @@ public class SimpleDocumentStateTracker implements DocumentStateTracker, Documen
 	}
 
 	@Override
-	public void onDidChangeContent(Consumer<TextDocumentContentChange> l) {
-		documentChangeListeners.add(l);
+	public Disposable onDidChangeContent(Consumer<TextDocumentContentChange> l) {
+		return documentChangeListeners.add(l);
 	}
 
 	@Override
-	public void onDidClose(Consumer<TextDocument> l) {
-		documentCloseListeners.add(l);
+	public Disposable onDidClose(Consumer<TextDocument> l) {
+		return documentCloseListeners.add(l);
 	}
 }
