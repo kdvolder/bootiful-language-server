@@ -18,8 +18,6 @@ public class ExampleWordcheckApplication {
 	
 	@Autowired Wordlist wordlist;
 
-	@Autowired SimpleLanguageServer server;
-
 	@Bean LinterFunction linter() {
 		return new BadWordLinter(wordlist.getWords());
 	}
