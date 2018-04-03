@@ -10,9 +10,8 @@ export function activate(context: VSCode.ExtensionContext) {
     let options : commons.ActivatorOptions = {
         DEBUG : false,
         CONNECT_TO_LS: false,
-        extensionId: 'vscode-concourse',
+        extensionId: 'vscode-wordcheck',
         jvmHeap: "48m",
-        workspaceOptions: VSCode.workspace.getConfiguration("concourse.ls"),
         clientOptions: {
             documentSelector: [ WORDCHECK_LANGUAGE_ID ]
         }
