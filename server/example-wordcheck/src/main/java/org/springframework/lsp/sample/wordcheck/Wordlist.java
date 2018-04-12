@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class Wordlist {
 
 	/**
-	 * List of words. Words on this list are considered 'valid' by the 
+	 * List of valid words. Words on this list are considered 'valid' by the 
 	 * wordchecker. Any words not on the list are considered invalid.
 	 */
 	private List<String> words;

@@ -36,10 +36,10 @@ public class BadWordLinter implements LinterFunction {
 	private static final Pattern SPACE = Pattern.compile("[^\\w]+");
 	protected static final ProblemType BADWORD_PROBLEM = ProblemTypes.create("BADWORD", ProblemSeverity.ERROR);
 	
-	private Set<String> badWords;
+	private Set<String> goodWords;
 
 	public BadWordLinter(List<String> words) {
-		this.badWords = ImmutableSet.copyOf(words);
+		this.goodWords = ImmutableSet.copyOf(words);
 	}
 
 	@Override
@@ -47,7 +47,8 @@ public class BadWordLinter implements LinterFunction {
 		//Take care not produce the array of words until subscription time.
 		return Flux.defer(() -> Flux.fromArray(new DocumentRegion(doc).split(SPACE)))
 				.doOnNext(w -> System.out.println("word = "+w))
-				.filter(w -> badWords.contains(w.toString()))
+				.filter(w -> w.length()>0)
+				.filter(w -> !goodWords.contains(w.toString()))
 				.doOnNext(w -> System.out.println("badWord = "+w))
 				.map(this::problem);
 	}
