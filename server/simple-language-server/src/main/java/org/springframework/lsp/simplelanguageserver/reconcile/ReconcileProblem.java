@@ -1,6 +1,7 @@
 package org.springframework.lsp.simplelanguageserver.reconcile;
 
-import java.util.List;
+import org.eclipse.lsp4j.Range;
+import org.springframework.lsp.simplelanguageserver.document.DocumentRegion;
 
 /**
  * Minimal interface that objects representing a reconciler problem must
@@ -11,7 +12,6 @@ import java.util.List;
 public interface ReconcileProblem {
 	ProblemType getType();
 	String getMessage();
-	int getOffset();
-	int getLength();
 	String getCode();
+	DocumentRegion getRegion();
 }

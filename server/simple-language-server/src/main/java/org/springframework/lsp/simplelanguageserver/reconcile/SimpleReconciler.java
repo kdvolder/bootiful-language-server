@@ -77,7 +77,7 @@ public class SimpleReconciler {
 		if (severity!=null) {
 			try {
 				Diagnostic d = new Diagnostic();
-				d.setRange(doc.toRange(new Region(problem.getOffset(), problem.getLength())));
+				d.setRange(problem.getRegion().asRange());
 				d.setCode(problem.getCode());
 				d.setMessage(problem.getMessage());
 				d.setSeverity(getDiagnosticSeverity(problem));

@@ -34,18 +34,8 @@ public class DefaultReconcileProblemImpl implements ReconcileProblem {
 	}
 
 	@Override
-	public int getOffset() {
-		return region.getStart();
-	}
-
-	@Override
 	public String getMessage() {
 		return message;
-	}
-
-	@Override
-	public int getLength() {
-		return region.getLength();
 	}
 
 	@Override
@@ -56,5 +46,10 @@ public class DefaultReconcileProblemImpl implements ReconcileProblem {
 	@Override
 	public String toString() {
 		return "ReconcileProblem [type=" + type.getCode() + ", message=" + message + "]";
+	}
+
+	@Override
+	public DocumentRegion getRegion() {
+		return region;
 	}
 }
