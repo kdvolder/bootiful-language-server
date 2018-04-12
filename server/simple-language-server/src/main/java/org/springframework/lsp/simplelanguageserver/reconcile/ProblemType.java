@@ -1,5 +1,7 @@
 package org.springframework.lsp.simplelanguageserver.reconcile;
 
+import org.springframework.lsp.simplelanguageserver.document.DocumentRegion;
+
 /**
  * Besides the methods below, the only hard requirement for a 'problem type' is
  * that it is a unique object that is not 'equals' to any other object.
@@ -15,4 +17,8 @@ public interface ProblemType {
 	ProblemSeverity getDefaultSeverity();
 	String toString();
 	String getCode();
+	
+	default ReconcileProblem create(DocumentRegion highlight, String message) {
+		return new DefaultReconcileProblemImpl(ProblemType.this, highlight, message);
+	};
 }

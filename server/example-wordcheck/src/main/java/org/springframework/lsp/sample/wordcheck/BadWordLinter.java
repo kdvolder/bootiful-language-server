@@ -53,33 +53,7 @@ public class BadWordLinter implements LinterFunction {
 	}
 
 	private ReconcileProblem problem(DocumentRegion badWord) {
-		return new ReconcileProblem() {
-			
-			@Override
-			public ProblemType getType() {
-				return BADWORD_PROBLEM;
-			}
-			
-			@Override
-			public int getOffset() {
-				return badWord.getStart();
-			}
-			
-			@Override
-			public String getMessage() {
-				return "'"+badWord+"' is a bad word!";
-			}
-			
-			@Override
-			public int getLength() {
-				return badWord.getLength();
-			}
-			
-			@Override
-			public String getCode() {
-				return BADWORD_PROBLEM.getCode();
-			}
-		};
+		return BADWORD_PROBLEM.create(badWord, "'"+badWord+"' is a bad word!");
 	}
 	
 }
