@@ -52,4 +52,9 @@ public class DefaultReconcileProblemImpl implements ReconcileProblem {
 	public String getCode() {
 		return type.getCode();
 	}
+
+	@Override
+	public String toString() {
+		return "ReconcileProblem [type=" + type.getCode() + ", message=" + message + "]";
+	}
 }
