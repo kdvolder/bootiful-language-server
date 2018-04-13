@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
 
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -38,10 +39,15 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.Lifecycle;
+import org.springframework.lsp.simplelanguageserver.util.AsyncRunner;
 import org.springframework.util.Assert;
+
+import reactor.core.Disposable;
 
 
 /**
@@ -50,15 +56,16 @@ import org.springframework.util.Assert;
  * @author Kris De Volder
  * @author Martin Lippert
  */
-public class LanguageServerApp implements ApplicationRunner {
+public class LanguageServerApp implements ApplicationRunner, DisposableBean {
 
 	private static final Logger log = LoggerFactory.getLogger(LanguageServerApp.class);
 	
 	public static final String STS4_LANGUAGESERVER_NAME = "sts4.languageserver.name";
 
+	private AsyncRunner async = new AsyncRunner(LanguageServerApp.class.getSimpleName(), false);
 	private LanguageServerAppProperties properties;
 	private LanguageServer server;
-	
+
 	@Autowired
 	public void setProperties(LanguageServerAppProperties properties) {
 		this.properties = properties;
@@ -71,17 +78,6 @@ public class LanguageServerApp implements ApplicationRunner {
 		this.server = server;
 	}
 
-	@Override
-	public void run(ApplicationArguments args) throws Exception {
-		Integer serverPort = properties.getServerPort();
-		if (serverPort!=null) {
-			startAsSocketServer(serverPort);
-			return;
-		} 
-		Integer clientPort = properties.getClientPort();
-		start(clientPort);
-	}
-	
 	protected static class Connection {
 		final InputStream in;
 		final OutputStream out;
@@ -173,11 +169,14 @@ public class LanguageServerApp implements ApplicationRunner {
 	}
 
 	/**
-	 * Creates the thread pool / executor passed to lsp4j server intialization. From the looks of things,
-	 * @return
+	 * Creates the thread pool / executor passed to lsp4j server intialization. From the looks of things.
 	 */
     protected ExecutorService createServerThreads() {
-		return Executors.newCachedThreadPool();
+		return Executors.newSingleThreadExecutor(r -> {
+			Thread t = new Thread(r, "LSP4J");
+			t.setDaemon(true); // maybe if we set this as false. We don't need our own async thread to avoid jvm shutting down
+			return t;
+		});
 	}
 
 	private <T> Launcher<T> createSocketLauncher(Object localService, Class<T> remoteInterface, SocketAddress socketAddress, ExecutorService executorService, Function<MessageConsumer, MessageConsumer> wrapper) throws IOException {
@@ -245,6 +244,25 @@ public class LanguageServerApp implements ApplicationRunner {
 		}
 
 		launcher.startListening().get();
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		log.info("Language Server shutting down");
+		async.dispose();
+	}
+	
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		async.execute(() -> {
+			Integer serverPort = properties.getServerPort();
+			if (serverPort!=null) {
+				startAsSocketServer(serverPort);
+				return;
+			} 
+			Integer clientPort = properties.getClientPort();
+			start(clientPort);
+		});
 	}
 
 }

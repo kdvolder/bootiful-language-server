@@ -21,6 +21,10 @@ public class AsyncRunner {
 		executor = Schedulers.newSingle(threadName);
 	}
 
+	public AsyncRunner(String threadName, boolean daemon) {
+		executor = Schedulers.newSingle(threadName, daemon);
+	}
+
 	public synchronized <T> CompletableFuture<T> invoke(Callable<T> callable) {
 		CompletableFuture<T> x = Mono.fromCallable(callable).subscribeOn(executor).toFuture();
 		lastRequest = x;
@@ -68,4 +72,7 @@ public class AsyncRunner {
 		}
 	}
 
+	public void dispose() {
+		executor.dispose();
+	}
 }
