@@ -40,10 +40,11 @@ public class WordlistCompletionProvider implements CompletionProvider {
 	@Override
 	public Flux<CompletionProposal> getCompletions(IDocument doc, int position) {
 		int start = position;
-		while (Character.isLetter(doc.getSafeChar(start))) {
+		while (Character.isLetter(doc.getSafeChar(start-1))) {
 			start--;
 		}
 		DocumentRegion prefix = new DocumentRegion(doc, start, position);
+		log.debug("Completion prexix '{}'", prefix);
 		return Flux.fromIterable(wordlist.getWords())
 		.flatMap(word -> {
 			try {
@@ -52,7 +53,10 @@ public class WordlistCompletionProvider implements CompletionProvider {
 				//Language server client (at least vscode) filters the list all itself. But I'm not
 				//100% sure that every client does this. The spec isn't totally clear about that.
 				if (FuzzyMatcher.matchScore(prefix, word)!=0.0) {
+					log.debug("+ word: {}", word);
 					return Mono.just(CompletionProposals.simple(prefix, word));
+				} else {
+					log.debug("- word: {}", word);
 				}
 			} catch (BadLocationException e) {
 				log.error("", e);

@@ -1,6 +1,7 @@
-logging:
-  level:
-    org.springframework.lsp.simplelanguageserver.SimpleLanguageServer: debug
+# logging:
+#   level:
+#     org.springframework.lsp.simplelanguageserver.SimpleLanguageServer: debug
+#     org.springframework.lsp.sample.wordcheck.WordlistCompletionProvider: debug
 spring:
   lsp:
     name: wordcheck-sample-languageserver

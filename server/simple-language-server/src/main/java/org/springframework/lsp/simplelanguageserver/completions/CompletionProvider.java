@@ -15,7 +15,6 @@
  */
 package org.springframework.lsp.simplelanguageserver.completions;
 
-import org.eclipse.lsp4j.Position;
 import org.springframework.lsp.simplelanguageserver.document.IDocument;
 
 import reactor.core.publisher.Flux;
