@@ -16,6 +16,7 @@
 package org.springframework.lsp.simplelanguageserver;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.lsp4j.Diagnostic;
@@ -43,7 +44,7 @@ public class SimpleLanguageServer implements LanguageServer, LanguageClientAware
 	private AsyncRunner async;
 	private LanguageClient client;
 	private TextDocumentService textDocumentService;
-	private DocumentStateTracker documentTracker;
+	private List<ServerCapabilityInitializer> serverCapabilityInitializers;
 	
 	private WorkspaceService workspaceService;
 
@@ -57,11 +58,11 @@ public class SimpleLanguageServer implements LanguageServer, LanguageClientAware
 		this.workspaceService = workspaceService;
 	}
 
-	@Autowired(required=false)
-	public void setDocumentTracker(DocumentStateTracker documentTracker) {
-		this.documentTracker = documentTracker;
+	@Autowired
+	public void setServerCapabilityInitializers(List<ServerCapabilityInitializer> serverCapabilityInitializers) {
+		this.serverCapabilityInitializers = serverCapabilityInitializers;
 	}
-
+	
 	@Autowired
 	public void setAsync(AsyncRunner async) {
 		this.async = async;
@@ -79,13 +80,10 @@ public class SimpleLanguageServer implements LanguageServer, LanguageClientAware
 
 	protected final ServerCapabilities getServerCapabilities() {
 		ServerCapabilities c = new ServerCapabilities();
-		if (documentTracker!=null) {
-			c.setTextDocumentSync(documentTracker.canHandleIncrementalChanges() 
-					? TextDocumentSyncKind.Incremental 
-					: TextDocumentSyncKind.Full
-			);
-		} else {
-			c.setTextDocumentSync(TextDocumentSyncKind.None);
+		log.debug("Configuring Server Capabilities...");
+		for (ServerCapabilityInitializer i : serverCapabilityInitializers) {
+			log.debug("Calling serverCapabilityInitializer {}", i);
+			i.initializeCapabilities(c);
 		}
 		log.info("Determined Server Capabilities {}", c);
 		return c;

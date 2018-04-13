@@ -37,9 +37,11 @@ import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.RenameParams;
+import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
@@ -48,7 +50,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lsp.simplelanguageserver.handlers.CompletionHandler;
 import org.springframework.util.Assert;
 
-public class SimpleTextDocumentService implements TextDocumentService {
+public class SimpleTextDocumentService implements TextDocumentService, ServerCapabilityInitializer {
+	
+	@Autowired(required=false)
+	public void setCompletionHandler(CompletionHandler completionHandler) {
+		Assert.isNull(this.completionHandler, "completionHandler already set");
+		this.completionHandler = completionHandler;
+	}
+
+	public DocumentStateTracker getDocumentStateTracker() {
+		return documentStateTracker;
+	}
+	
+	@Autowired(required=false)
+	public void setDocumentStateTracker(DocumentStateTracker documentStateTracker) {
+		this.documentStateTracker = documentStateTracker;
+	}
 	
 	private CompletionHandler completionHandler;
 	private DocumentStateTracker documentStateTracker;
@@ -165,18 +182,15 @@ public class SimpleTextDocumentService implements TextDocumentService {
 		
 	}
 
-	public void setCompletionHandler(CompletionHandler completionHandler) {
-		Assert.isNull(this.completionHandler, "completionHandler already set");
-		this.completionHandler = completionHandler;
+	@Override
+	public void initializeCapabilities(ServerCapabilities c) {
+		if (documentStateTracker!=null) {
+			c.setTextDocumentSync(documentStateTracker.canHandleIncrementalChanges() 
+					? TextDocumentSyncKind.Incremental 
+					: TextDocumentSyncKind.Full
+			);
+		} else {
+			c.setTextDocumentSync(TextDocumentSyncKind.None);
+		}
 	}
-
-	public DocumentStateTracker getDocumentStateTracker() {
-		return documentStateTracker;
-	}
-	
-	@Autowired(required=false)
-	public void setDocumentStateTracker(DocumentStateTracker documentStateTracker) {
-		this.documentStateTracker = documentStateTracker;
-	}
-
 }

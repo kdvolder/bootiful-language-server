@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lsp.simplelanguageserver.document.DocumentRegion;
 import org.springframework.lsp.simplelanguageserver.document.IDocument;
 import org.springframework.lsp.simplelanguageserver.reconcile.LinterFunction;
@@ -33,6 +35,8 @@ import reactor.core.publisher.Flux;
 
 public class BadWordLinter implements LinterFunction {
 	
+	private static final Logger log = LoggerFactory.getLogger(BadWordLinter.class);
+	
 	private static final Pattern SPACE = Pattern.compile("[^\\w]+");
 	protected static final ProblemType BADWORD_PROBLEM = ProblemTypes.create("BADWORD", ProblemSeverity.ERROR);
 	
@@ -46,10 +50,10 @@ public class BadWordLinter implements LinterFunction {
 	public Flux<ReconcileProblem> lint(IDocument doc) {
 		//Take care not produce the array of words until subscription time.
 		return Flux.defer(() -> Flux.fromArray(new DocumentRegion(doc).split(SPACE)))
-				.doOnNext(w -> System.out.println("word = "+w))
+				.doOnNext(w -> log.debug("word = {}", w))
 				.filter(w -> w.length()>0)
 				.filter(w -> !goodWords.contains(w.toString()))
-				.doOnNext(w -> System.out.println("badWord = "+w))
+				.doOnNext(w -> log.debug("badWord = {}", w))
 				.map(this::problem);
 	}
 

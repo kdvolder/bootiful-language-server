@@ -25,12 +25,14 @@ import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lsp.simplelanguageserver.document.BadLocationException;
+import org.springframework.lsp.simplelanguageserver.document.IDocument;
 import org.springframework.lsp.simplelanguageserver.document.LanguageId;
 import org.springframework.lsp.simplelanguageserver.document.TextDocument;
 import org.springframework.lsp.simplelanguageserver.document.TextDocumentContentChange;
@@ -41,7 +43,7 @@ import com.google.common.collect.ImmutableList;
 
 import reactor.core.Disposable;
 
-public class SimpleDocumentStateTracker implements DocumentStateTracker, DocumentListenerManager {
+public class SimpleDocumentStateTracker implements DocumentStateTracker, DocumentListenerManager, DocumentRepository {
 	
 	private static final Logger log = LoggerFactory.getLogger(SimpleDocumentStateTracker.class);
 	
@@ -58,6 +60,17 @@ public class SimpleDocumentStateTracker implements DocumentStateTracker, Documen
 			doc = createDocument(url, LanguageId.PLAINTEXT, 0, "");
 		}
 		return doc.getDocument();
+	}
+
+	@Override
+	public IDocument getDocument(TextDocumentIdentifier textDocument) {
+		if (textDocument!=null) {
+			String url = textDocument.getUri();
+			if (url!=null) {
+				return getDocument(url);
+			}
+		}
+		return null;
 	}
 
 	private synchronized TrackedDocument createDocument(String url, LanguageId languageId, int version, String text) {
@@ -176,4 +189,5 @@ public class SimpleDocumentStateTracker implements DocumentStateTracker, Documen
 	public Disposable onDidClose(Consumer<TextDocument> l) {
 		return documentCloseListeners.add(l);
 	}
+
 }

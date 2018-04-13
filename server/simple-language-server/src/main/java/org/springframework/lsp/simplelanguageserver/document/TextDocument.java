@@ -219,6 +219,7 @@ public class TextDocument implements IDocument {
 		return lineTracker.getLineOffset(line);
 	}
 
+	@Override
 	public int toOffset(Position position) throws BadLocationException {
 		IRegion region = lineTracker.getLineInformation(position.getLine());
 		int lineStart = region.getOffset();
@@ -283,6 +284,7 @@ public class TextDocument implements IDocument {
 	 * Like getChar but never throws {@link BadLocationException}. Instead it
 	 * return (char)0 for offsets outside the document.
 	 */
+	@Override
 	public char getSafeChar(int offset) {
 		try {
 			return getChar(offset);

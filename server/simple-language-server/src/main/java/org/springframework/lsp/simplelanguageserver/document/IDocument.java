@@ -49,5 +49,7 @@ public interface IDocument {
 	
 	Range toRange(IRegion asRegion) throws BadLocationException;
 	Position toPosition(int offset) throws BadLocationException;
+	char getSafeChar(int offset);
+	int toOffset(Position position) throws BadLocationException;
 
 }

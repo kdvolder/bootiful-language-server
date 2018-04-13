@@ -10,6 +10,8 @@ import org.springframework.lsp.simplelanguageserver.SimpleTextDocumentService;
 import org.springframework.lsp.simplelanguageserver.SimpleWorkspaceService;
 import org.springframework.lsp.simplelanguageserver.app.LanguageServerApp;
 import org.springframework.lsp.simplelanguageserver.app.LanguageServerAppProperties;
+import org.springframework.lsp.simplelanguageserver.completions.CompletionProvider;
+import org.springframework.lsp.simplelanguageserver.completions.SimpleCompletionEngine;
 import org.springframework.lsp.simplelanguageserver.reconcile.LinterFunction;
 import org.springframework.lsp.simplelanguageserver.reconcile.SimpleReconciler;
 import org.springframework.lsp.simplelanguageserver.util.AsyncRunner;
@@ -29,6 +31,11 @@ public class SimpleLanguageServerAutoConf {
 	//@ConditionalOnBean({LinterFunction.class})
 	@Bean SimpleReconciler reconciler() {
 		return new SimpleReconciler();
+	}
+	
+	//@ConditionalOnBean({CompletionProvider.class})
+	@Bean SimpleCompletionEngine completionEngine() {
+		return new SimpleCompletionEngine();
 	}
 	
 	@Bean SimpleTextDocumentService textDocumentService() {

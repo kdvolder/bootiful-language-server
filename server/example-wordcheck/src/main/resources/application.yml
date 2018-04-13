@@ -1,7 +1,7 @@
+logging:
+  level:
+    org.springframework.lsp.simplelanguageserver.SimpleLanguageServer: debug
 spring:
-  output:
-    ansi:
-      enabled: never
   lsp:
     name: wordcheck-sample-languageserver
     sample:

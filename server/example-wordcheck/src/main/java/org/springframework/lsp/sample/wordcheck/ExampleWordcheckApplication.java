@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lsp.simplelanguageserver.SimpleLanguageServer;
+import org.springframework.lsp.simplelanguageserver.completions.CompletionProvider;
 import org.springframework.lsp.simplelanguageserver.reconcile.LinterFunction;
 
 @SpringBootApplication
@@ -16,10 +17,12 @@ public class ExampleWordcheckApplication {
 		SpringApplication.run(ExampleWordcheckApplication.class, args);
 	}
 	
-	@Autowired Wordlist wordlist;
-
-	@Bean LinterFunction linter() {
+	@Bean LinterFunction linter(Wordlist wordlist) {
 		return new BadWordLinter(wordlist.getWords());
+	}
+	
+	@Bean CompletionProvider completions(Wordlist wordlist) {
+		return new WordlistCompletionProvider(wordlist);
 	}
 	
 }
