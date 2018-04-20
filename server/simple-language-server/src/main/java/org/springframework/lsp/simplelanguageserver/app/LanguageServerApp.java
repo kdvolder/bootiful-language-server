@@ -29,7 +29,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -43,11 +44,11 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.Lifecycle;
-import org.springframework.lsp.simplelanguageserver.util.AsyncRunner;
 import org.springframework.util.Assert;
 
 import reactor.core.Disposable;
+import reactor.core.Disposable.Composite;
+import reactor.core.Disposables;
 
 
 /**
@@ -58,11 +59,12 @@ import reactor.core.Disposable;
  */
 public class LanguageServerApp implements ApplicationRunner, DisposableBean {
 
+	private Disposable.Composite disposables = Disposables.composite();
+
 	private static final Logger log = LoggerFactory.getLogger(LanguageServerApp.class);
 	
 	public static final String STS4_LANGUAGESERVER_NAME = "sts4.languageserver.name";
 
-	private AsyncRunner async = new AsyncRunner(LanguageServerApp.class.getSimpleName(), false);
 	private LanguageServerAppProperties properties;
 	private LanguageServer server;
 
@@ -78,7 +80,7 @@ public class LanguageServerApp implements ApplicationRunner, DisposableBean {
 		this.server = server;
 	}
 
-	protected static class Connection {
+	protected static class Connection implements Disposable {
 		final InputStream in;
 		final OutputStream out;
 		final Socket socket;
@@ -89,7 +91,7 @@ public class LanguageServerApp implements ApplicationRunner, DisposableBean {
 			this.socket = socket;
 		}
 
-		void dispose() {
+		public void dispose() {
 			if (in != null) {
 				try {
 					in.close();
@@ -116,18 +118,9 @@ public class LanguageServerApp implements ApplicationRunner, DisposableBean {
 
 	public void start(Integer clientPort) throws IOException {
 		log.info("Starting LS");
-		Connection connection = null;
-		try {
-			connection = connectToClient(clientPort);
-			run(connection);
-		} catch (Throwable t) {
-			log.error("", t);
-			System.exit(1); //TODO: proper way to shutdown boot app?
-		} finally {
-			if (connection != null) {
-				connection.dispose();
-			}
-		}
+		Connection connection = connectToClient(clientPort);
+		disposables.add(connection);
+		run(connection);
 	}
 
 	/**
@@ -141,8 +134,9 @@ public class LanguageServerApp implements ApplicationRunner, DisposableBean {
 	 *
 	 * Source of inspiration:
 	 * https://github.com/itemis/xtext-languageserver-example/blob/master/org.xtext.example.mydsl.ide/src/org/xtext/example/mydsl/ide/RunServer.java
+	 * @return 
 	 */
-	public void startAsSocketServer(int port) throws IOException, InterruptedException {
+	public void startAsSocketServer(int port) throws IOException {
 		log.info("Starting LS as standlone server on port {}", port);
 
 		Function<MessageConsumer, MessageConsumer> wrapper = consumer -> {
@@ -161,11 +155,18 @@ public class LanguageServerApp implements ApplicationRunner, DisposableBean {
 		if (server instanceof LanguageClientAware) {
 			((LanguageClientAware)server).connect(launcher.getRemoteProxy());
 		}
-		Future<?> future = launcher.startListening();
-		while (!future.isDone()) {
-			//TODO: better way to keep boot app alive than by blocking the runner thread?
-			Thread.sleep(10_000l);
-		}
+		Future<Void> future = launcher.startListening();
+		disposables.add(waitFor(future));
+	}
+
+	private Disposable waitFor(Future<Void> future) {
+		return () -> {
+			try {
+				future.get(3, TimeUnit.SECONDS);
+			} catch (Exception e) {
+				log.warn("", e);
+			}
+		};
 	}
 
 	/**
@@ -174,7 +175,7 @@ public class LanguageServerApp implements ApplicationRunner, DisposableBean {
     protected ExecutorService createServerThreads() {
 		return Executors.newSingleThreadExecutor(r -> {
 			Thread t = new Thread(r, "LSP4J");
-			t.setDaemon(true); // maybe if we set this as false. We don't need our own async thread to avoid jvm shutting down
+			t.setDaemon(false); // maybe if we set this as false. We don't need our own async thread to avoid jvm shutting down
 			return t;
 		});
 	}
@@ -215,11 +216,13 @@ public class LanguageServerApp implements ApplicationRunner, DisposableBean {
 	 * Listen for requests from the parent node process.
 	 * Send replies asynchronously.
 	 * When the request stream is closed, wait for 5s for all outstanding responses to compute, then return.
+	 * @return 
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
-	protected void run(Connection connection) throws InterruptedException, ExecutionException {
+	protected void run(Connection connection) {
 		ExecutorService executor = createServerThreads();
+		disposables.add(executor::shutdown);
 		Function<MessageConsumer, MessageConsumer> wrapper = (MessageConsumer consumer) -> {
 			return (msg) -> {
 				try {
@@ -243,26 +246,24 @@ public class LanguageServerApp implements ApplicationRunner, DisposableBean {
 			((LanguageClientAware) server).connect(client);
 		}
 
-		launcher.startListening().get();
+		disposables.add(waitFor(launcher.startListening()));
 	}
 
 	@Override
 	public void destroy() throws Exception {
 		log.info("Language Server shutting down");
-		async.dispose();
+		disposables.dispose();
 	}
 	
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		async.execute(() -> {
-			Integer serverPort = properties.getServerPort();
-			if (serverPort!=null) {
-				startAsSocketServer(serverPort);
-				return;
-			} 
+		Integer serverPort = properties.getServerPort();
+		if (serverPort!=null) {
+			startAsSocketServer(serverPort);
+		} else {
 			Integer clientPort = properties.getClientPort();
 			start(clientPort);
-		});
+		}
 	}
 
 }

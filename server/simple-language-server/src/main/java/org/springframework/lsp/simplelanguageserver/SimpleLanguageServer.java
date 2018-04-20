@@ -25,7 +25,6 @@ import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
-import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -96,7 +95,9 @@ public class SimpleLanguageServer implements LanguageServer, LanguageClientAware
 
 	@Override
 	public void exit() {
-		System.exit(0);
+		//Carefull calling System.exit directly can cause deadlock!
+		//Not totally understood why.
+		async.execute(() -> System.exit(0));
 	}
 
 	@Override
